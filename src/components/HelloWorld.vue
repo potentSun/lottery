@@ -55,137 +55,32 @@
         <span class="time">07-17 20:00</span>停售
       </p>
       <div class="chooseAll">
-        <div v-if="this.currentChooseNum < 1">
+        <div v-if="currentChooseNum < 1">
           每位至少选择
           <strong class="chooseNum">1</strong>个
         </div>
         <div v-else>
           <span>
             已经选择
-            <strong class="chooseNum">6</strong>个
+            <strong class="chooseNum">{{currentChooseNum}}</strong>个
           </span>&nbsp;&nbsp;
-          <a class="chooseDelete" href="javascript:void(0);">全清</a>
+          <a class="chooseDelete" href="javascript:void(0);" @click="_allClear">全清</a>
         </div>
       </div>
-      <div class="ballbox3Dbox">
-        <b class="fontred2">百位：</b>
+      <div class="ballbox3Dbox" v-for="(item, index) in ballboxData" :key="index + 'h'">
+        <b class="fontred2">{{item.name}}：</b>
         <div class="ballbox">
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">2</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">3</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">4</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">5</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">6</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">7</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">8</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">9</span>
-            <p>3</p>
+          <div
+            class="ballList"
+            v-for="(val, k) in item.param"
+            :key="k + 'h'"
+            @click="_currentCheck(item, val)"
+          >
+            <span class="numBall" :class="{ 'activeBall': val.checked}">{{val.num}}</span>
+            <p>{{val.sign}}</p>
           </div>
         </div>
       </div>
-      <!-- <div class="ballbox3Dbox">
-        <b class="fontred2">百位：</b>
-        <div class="ballbox">
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-        </div>
-      </div>
-      <div class="ballbox3Dbox">
-        <b class="fontred2">百位：</b>
-        <div class="ballbox">
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">0</span>
-            <p>遗漏6</p>
-          </div>
-          <div class="ballList">
-            <span class="numBall">1</span>
-            <p>3</p>
-          </div>
-        </div>
-      </div> -->
     </div>
     <div class="btmNav">
       <span class="multiple" @click="_multipleDialog" v-if="customizeType">{{multipleNum}}倍</span>
@@ -197,7 +92,8 @@
         v-model="multipleNum"
         @blur="_customizeNum"
       />
-      <span class="money">{{multipleNum * 2}} 元</span>
+      <span class="money" v-if="rankLength > 0">{{multipleNum * rankLength * 2}} 元</span>
+      <span class="money" v-else>0 元</span>
       <span class="choosed" @click="_submitData">选好了</span>
     </div>
     <div v-show="multipleShow" class="multipleNav">
@@ -226,9 +122,148 @@ export default {
       multipleShow: false,
       overlay: false,
       multipleNum: 1,
+      rankLength: 0,
       customizeNum: 1,
       customizeType: true,
       current: 0,
+      // 3Dbox数据
+      ballboxData: [
+        {
+          name: "百位",
+          param: [
+            {
+              num: 0,
+              sign: "11"
+            },
+            {
+              num: 1,
+              sign: "11"
+            },
+            {
+              num: 2,
+              sign: "11"
+            },
+            {
+              num: 3,
+              sign: "11"
+            },
+            {
+              num: 4,
+              sign: "11"
+            },
+            {
+              num: 5,
+              sign: "11"
+            },
+            {
+              num: 6,
+              sign: "11"
+            },
+            {
+              num: 7,
+              sign: "11"
+            },
+            {
+              num: 8,
+              sign: "11"
+            },
+            {
+              num: 9,
+              sign: "11"
+            }
+          ]
+        },
+        {
+          name: "十位",
+          param: [
+            {
+              num: 0,
+              sign: "11"
+            },
+            {
+              num: 1,
+              sign: "11"
+            },
+            {
+              num: 2,
+              sign: "11"
+            },
+            {
+              num: 3,
+              sign: "11"
+            },
+            {
+              num: 4,
+              sign: "11"
+            },
+            {
+              num: 5,
+              sign: "11"
+            },
+            {
+              num: 6,
+              sign: "11"
+            },
+            {
+              num: 7,
+              sign: "11"
+            },
+            {
+              num: 8,
+              sign: "11"
+            },
+            {
+              num: 9,
+              sign: "11"
+            }
+          ]
+        },
+        {
+          name: "个位",
+          param: [
+            {
+              num: 0,
+              sign: "11"
+            },
+            {
+              num: 1,
+              sign: "11"
+            },
+            {
+              num: 2,
+              sign: "11"
+            },
+            {
+              num: 3,
+              sign: "11"
+            },
+            {
+              num: 4,
+              sign: "11"
+            },
+            {
+              num: 5,
+              sign: "11"
+            },
+            {
+              num: 6,
+              sign: "11"
+            },
+            {
+              num: 7,
+              sign: "11"
+            },
+            {
+              num: 8,
+              sign: "11"
+            },
+            {
+              num: 9,
+              sign: "11"
+            }
+          ]
+        }
+      ],
       // 弹框
       diologData: [
         {
@@ -257,16 +292,64 @@ export default {
         }
       ],
       // 排列
-      currentCombination: [
-        [1, 2],
-        [4, 5],
-        [6, 7],
-      ],
+      currentCombination: [[], [], []],
       resultsRank: [],
       resultRank: []
     };
   },
+  created() {
+    this._getBoxData();
+  },
   methods: {
+    _getBoxData() {
+      this.ballboxData.map(item => {
+        item.param.map(data => {
+          this.$set(data, "checked", false);
+        });
+      });
+    },
+    _currentCheck(item, val) {
+      val.checked = !val.checked;
+      if (val.checked) {
+        this.currentChooseNum++;
+      } else {
+        this.currentChooseNum--;
+      }
+      if (item.name == "百位") {
+        let hundredArr = [];
+        item.param.forEach(element => {
+          if (element.checked) {
+            hundredArr.push(element.num);
+          }
+        });
+        this.currentCombination[0] = hundredArr;
+      } else if (item.name == "十位") {
+        let tenArr = [];
+        item.param.forEach(element => {
+          if (element.checked) {
+            tenArr.push(element.num);
+          }
+        });
+        this.currentCombination[1] = tenArr;
+      } else {
+        let onesArr = [];
+        item.param.forEach(element => {
+          if (element.checked) {
+            onesArr.push(element.num);
+          }
+        });
+        this.currentCombination[2] = onesArr;
+      }
+      let hundred = this.currentCombination[0].length;
+      let ten = this.currentCombination[1].length;
+      let one = this.currentCombination[2].length;
+      if (hundred > 0 && ten > 0 && one > 0) {
+        this._arrRank(this.currentCombination);
+      } else {
+        this.resultRank = [];
+        this.resultsRank = [];
+      }
+    },
     _multipleDialog() {
       this.multipleShow = true;
       this.overlay = true;
@@ -287,32 +370,48 @@ export default {
         this.multipleNum = item.key;
       }
     },
+    _allClear() {
+      this.rankLength = 0;
+      this.resultRank = [];
+      this.resultsRank = [];
+      this.currentChooseNum = 0;
+      this.currentCombination = [[], [], []];
+      this.ballboxData.map(item => {
+        item.param.map(data => {
+          this.$set(data, "checked", false);
+        });
+      });
+    },
     _customizeNum() {
       if (!this.multipleNum) {
         this.multipleNum = 1;
       }
     },
     _submitData() {
-      if (!this.currentCombination == []) {
+      let hundred = this.currentCombination[0].length;
+      let ten = this.currentCombination[1].length;
+      let one = this.currentCombination[2].length;
+      if (hundred == 0 || ten == 0 || one == 0) {
         this._randomDialog();
       } else {
         this._arrRank(this.currentCombination);
       }
     },
     _randomDialog() {
-      this.$dialog.confirm({
-        title: '号码为空',
-        message: '您没选号，我们帮您生成一注随机号码。'
-      }).then(() => {
-        let currentRandom = '';
-        for (let i = 0; i < 3; i++ ) {
-          let randomNum = parseInt(10 * Math.random())
-          currentRandom = randomNum + currentRandom;
-        }
-        console.log(currentRandom);
-      }).catch(() => {
-
-      });
+      this.$dialog
+        .confirm({
+          title: "号码为空",
+          message: "您没选号，我们帮您生成一注随机号码。"
+        })
+        .then(() => {
+          let currentRandom = "";
+          for (let i = 0; i < 3; i++) {
+            let randomNum = parseInt(10 * Math.random());
+            currentRandom = randomNum + currentRandom;
+          }
+          console.log(currentRandom);
+        })
+        .catch(() => {});
     },
     //递归
     _recursionArrRank(arr, depth) {
@@ -327,8 +426,9 @@ export default {
     },
     _arrRank(arr) {
       this._recursionArrRank(arr, 0);
+      this.rankLength = this.resultsRank.length;
       console.log(this.resultsRank.length, this.resultsRank.join(","));
-    },
+    }
   }
 };
 </script>
@@ -412,7 +512,7 @@ body {
       display: flex;
       &:last-child {
         border-bottom: none;
-        padding-bottom: 57px;        
+        padding-bottom: 57px;
       }
       .fontred2 {
         color: #e74c3c;
@@ -526,6 +626,10 @@ body {
   .multipleSign {
     color: #007bed !important;
     border-color: #007bed !important;
+  }
+  .activeBall {
+    background: #e74c3c !important;
+    color: #fff !important;
   }
 }
 </style>
