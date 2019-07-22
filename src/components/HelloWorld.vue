@@ -52,7 +52,7 @@
     <div class="details">
       <p class="clearfix">
         <span>第2019191期&nbsp;&nbsp;</span>
-        <span class="time">07-17 20:00</span>停售
+        <span class="time">07-17 20:00</span> 停售
       </p>
       <div class="chooseAll">
         <div v-if="currentChooseNum < 1">
@@ -67,13 +67,13 @@
           <a class="chooseDelete" href="javascript:void(0);" @click="_allClear">全清</a>
         </div>
       </div>
-      <div class="ballbox3Dbox" v-for="(item, index) in ballboxData" :key="index + 'h'">
+      <div class="ballbox3Dbox" v-for="(item, index) in ballboxData" :key="index">
         <b class="fontred2">{{item.name}}：</b>
         <div class="ballbox">
           <div
             class="ballList"
             v-for="(val, k) in item.param"
-            :key="k + 'h'"
+            :key="k"
             @click="_currentCheck(item, val)"
           >
             <span class="numBall" :class="{ 'activeBall': val.checked}">{{val.num}}</span>
@@ -394,7 +394,16 @@ export default {
       if (hundred == 0 || ten == 0 || one == 0) {
         this._randomDialog();
       } else {
-        this._arrRank(this.currentCombination);
+        let allMoney = this.multipleNum * this.rankLength * 2
+        this.$router.push({
+          name: 'Result', 
+          query: {
+            chooseNum: this.resultsRank,
+            rankLength: this.rankLength,
+            multipleNum: this.multipleNum,
+            money: allMoney
+          }
+        })
       }
     },
     _randomDialog() {
@@ -409,7 +418,12 @@ export default {
             let randomNum = parseInt(10 * Math.random());
             currentRandom = randomNum + currentRandom;
           }
-          console.log(currentRandom);
+          this.$router.push({
+            name: 'Result', 
+            query: { 
+              currentRandom: currentRandom
+            }
+          })
         })
         .catch(() => {});
     },
@@ -425,6 +439,8 @@ export default {
       }
     },
     _arrRank(arr) {
+      this.resultRank = [];
+      this.resultsRank = [];
       this._recursionArrRank(arr, 0);
       this.rankLength = this.resultsRank.length;
       console.log(this.resultsRank.length, this.resultsRank.join(","));
@@ -530,6 +546,7 @@ body {
           font-size: 12px;
           color: #ccc;
           width: 52px;
+          text-align: center;
           .numBall {
             border: 1px solid #e74c3c;
             color: #e74c3c;
